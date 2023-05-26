@@ -7,7 +7,6 @@ import me.dio.credit.application.system.dto.CustomerView
 import me.dio.credit.application.system.entity.Customer
 import me.dio.credit.application.system.service.impl.CustomerService
 import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -18,9 +17,9 @@ class CustomerController(
 ) {
 
     @PostMapping
-    fun saveCustomer(@RequestBody @Valid customerDto: CustomerDto): ResponseEntity<String> {
+    fun saveCustomer(@RequestBody @Valid customerDto: CustomerDto): ResponseEntity<CustomerView> {
         val savedCustomer = this.customerService.save(customerDto.toEntity())
-        return ResponseEntity.status(HttpStatus.CREATED).body("Customer ${savedCustomer.email} saved!")
+        return ResponseEntity.status(HttpStatus.CREATED).body(CustomerView(savedCustomer))
     }
 
     @GetMapping("/{id}")
