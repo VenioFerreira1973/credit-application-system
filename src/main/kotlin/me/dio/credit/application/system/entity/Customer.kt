@@ -1,5 +1,7 @@
 package me.dio.credit.application.system.entity
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import jakarta.persistence.*
 import java.math.BigDecimal
 
@@ -18,4 +20,9 @@ data class Customer(
     var credits: List<Credit> = mutableListOf(),
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) var id: Long? = null
 
-)
+){
+    fun toJson(): String {
+        val objectMapper = ObjectMapper().registerModule(JavaTimeModule())
+        return objectMapper.writeValueAsString(this)
+    }
+}
