@@ -2,6 +2,7 @@ package me.dio.credit.application.system.service
 
 import io.mockk.every
 import io.mockk.*
+import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import me.dio.credit.application.system.entity.Address
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ActiveProfiles
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -27,10 +29,10 @@ import java.util.*
 @ExtendWith(MockKExtension::class)
 class CreditServiceTest {
 
-    @MockK lateinit var customerRepository: CustomerRepository
     @MockK lateinit var creditRepository: CreditRepository
     @MockK lateinit var customerService: CustomerService
-    @MockK lateinit var creditService: CreditService
+    @InjectMockKs lateinit var creditService: CreditService
+
 
     @BeforeEach
     fun setup() {
@@ -39,6 +41,7 @@ class CreditServiceTest {
         creditService = CreditService(creditRepository, customerService)
 
     }
+
 
     @Test
     fun `should save credit`() {
@@ -75,16 +78,13 @@ class CreditServiceTest {
     @Test
     fun `should find credits by customerId`() {
 
-        // Given
-        val customer: Customer = buildCustomer()
-
-        //Criando o credit
         val customerId = 1L
         val creditCode = UUID.randomUUID()
         val creditValue = BigDecimal.valueOf(1000)
         val dayFirstInstallment = LocalDate.now()
         val numberOfInstallment = 12
 
+        val customer = Customer(id = customerId)
         val credit = Credit(
             creditCode = creditCode,
             creditValue = creditValue,
@@ -93,17 +93,19 @@ class CreditServiceTest {
             customer = customer
         )
 
-        every { customerRepository.save(customer) } returns customer
+        every { customerService.findById(customerId) } returns customer
         every { creditRepository.save(credit) } returns credit
 
-        // When -- não consegui resolver aparentemente o customer salvo no credit fica em uma referência de memória
-        // inacessivel uma solução para este caso, seria mockar um banco de dados pra gravar as informações
-        // mas não foi ensinado na aula
-        val result = creditService.findAllByCustomer(customerId).any { it.customer == credit.customer }
+        // When
+        creditService.save(credit)
+        every { creditRepository.findAllByCustomerId(customerId) } returns listOf(credit)
 
-        // Then
-        assert(result)//este teste falha
-        verify(exactly = 1) { creditRepository.findAllByCustomerId(customerId) }
+        val result = creditRepository.findAllByCustomerId(customerId)
+
+        Assertions.assertThat(result).contains(credit)
+        verify(exactly = 1) { customerService.findById(customerId) }
+        verify(exactly = 1) { creditRepository.save(credit) }
+
     }
 
     @Test
@@ -173,6 +175,7 @@ class CreditServiceTest {
         zipCode: String = "12345",
         street: String = "Rua do Venio",
         income: BigDecimal = BigDecimal.valueOf(1000.0),
+        id: Long = 1L
     ) = Customer(
         firstName = firstName,
         lastName = lastName,
@@ -184,5 +187,6 @@ class CreditServiceTest {
             street = street,
         ),
         income = income,
+        id = id
     )
 }

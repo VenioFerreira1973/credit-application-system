@@ -28,13 +28,10 @@ import java.util.Random
 class CustomerResourceTest {
     @Autowired
     private lateinit var customerRepository: CustomerRepository
-
     @Autowired
     private lateinit var mockMvc: MockMvc
-
     @Autowired
     private lateinit var objectMapper: ObjectMapper
-
     companion object {
         const val URL: String = "/api/customers"
     }
@@ -48,7 +45,7 @@ class CustomerResourceTest {
     @Test
     fun `should create a customer and return 201 status`() {
         //given
-        val customerDto: CustomerDto = builderCustomerDto()
+        val customerDto: CustomerDto = buildCustomerDto()
         val valueAsString: String = objectMapper.writeValueAsString(customerDto)
         //when
         //then
@@ -72,8 +69,8 @@ class CustomerResourceTest {
     @Test
     fun `should not save a customer with same CPF and return 409 status`() {
         //given
-        customerRepository.save(builderCustomerDto().toEntity())
-        val customerDto: CustomerDto = builderCustomerDto()
+        customerRepository.save(buildCustomerDto().toEntity())
+        val customerDto: CustomerDto = buildCustomerDto()
         val valueAsString: String = objectMapper.writeValueAsString(customerDto)
         //when
         //then
@@ -97,7 +94,7 @@ class CustomerResourceTest {
     @Test
     fun `should not save a customer with empty firstName and return 400 status`() {
         //given
-        val customerDto: CustomerDto = builderCustomerDto(firstName = "")
+        val customerDto: CustomerDto = buildCustomerDto(firstName = "")
         val valueAsString: String = objectMapper.writeValueAsString(customerDto)
         //when
         //then
@@ -121,7 +118,7 @@ class CustomerResourceTest {
     @Test
     fun `should find customer by id and return 200 status`() {
         //given
-        val customer: Customer = customerRepository.save(builderCustomerDto().toEntity())
+        val customer: Customer = customerRepository.save(buildCustomerDto().toEntity())
         //when
         //then
         mockMvc.perform(
@@ -165,7 +162,7 @@ class CustomerResourceTest {
     @Test
     fun `should delete customer by id and return 204 status`() {
         //given
-        val customer: Customer = customerRepository.save(builderCustomerDto().toEntity())
+        val customer: Customer = customerRepository.save(buildCustomerDto().toEntity())
         //when
         //then
         mockMvc.perform(
@@ -201,7 +198,7 @@ class CustomerResourceTest {
     @Test
     fun `should update a customer and return 200 status`() {
         //given
-        val customer: Customer = customerRepository.save(builderCustomerDto().toEntity())
+        val customer: Customer = customerRepository.save(buildCustomerDto().toEntity())
         val customerUpdateDto: CustomerUpdateDto = builderCustomerUpdateDto()
         val valueAsString: String = objectMapper.writeValueAsString(customerUpdateDto)
         //when
@@ -249,7 +246,7 @@ class CustomerResourceTest {
     }
 
 
-    private fun builderCustomerDto(
+    private fun buildCustomerDto(
         firstName: String = "Venio",
         lastName: String = "Ferreira",
         cpf: String = "28475934625",
@@ -258,6 +255,7 @@ class CustomerResourceTest {
         password: String = "1234",
         zipCode: String = "000000",
         street: String = "Rua do Venio",
+        id: Long = 1L
     ) = CustomerDto(
         firstName = firstName,
         lastName = lastName,
@@ -266,7 +264,8 @@ class CustomerResourceTest {
         income = income,
         password = password,
         zipCode = zipCode,
-        street = street
+        street = street,
+        id = id
     )
 
     private fun builderCustomerUpdateDto(

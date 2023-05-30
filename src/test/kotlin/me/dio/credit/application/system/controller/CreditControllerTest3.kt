@@ -26,7 +26,7 @@ import java.util.*
 @AutoConfigureMockMvc
 @ContextConfiguration
 @ExtendWith(MockKExtension::class)
-class CreditControllerTest {
+class CreditControllerTest3 {
 
     @Autowired
     private lateinit var customerRepository: CustomerRepository
@@ -62,12 +62,11 @@ class CreditControllerTest {
 
     }
 
-
     @Test
-    fun `should create a credit and return 201 status`() {
+    fun `find a credit with invalid creditCode and return 404 status`() {
         //given
-        //val customerIdFake = 1L
-        val customerDto: CustomerDto = Builds.buildCustomerDto()//(id = customerIdFake)
+        val customerIdFake = 1L
+        val customerDto: CustomerDto = Builds.buildCustomerDto(id = customerIdFake)
         val valueAsString: String = objectMapper.writeValueAsString(customerDto)
         //when
         //then
@@ -84,10 +83,17 @@ class CreditControllerTest {
             .andExpect(MockMvcResultMatchers.jsonPath("$.income").value("1000.0"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.zipCode").value("000000"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.street").value("Rua do Venio"))
-            //.andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
             .andDo(MockMvcResultHandlers.print())
 
-        val creditDto: CreditDto = Builds.buildCreditDto(customerId = 1L)
+        val creditCodeFake = UUID.fromString("aa547c0f-9a6a-451f-8c89-afddce916a29")
+        val creditCodeFakeInvalid = UUID.fromString("aa547c0f-9a6a-451f-8c89-afddce916a30")
+
+        val creditDto: CreditDto = Builds.buildCreditDto(
+            creditCode = creditCodeFake,
+            customerId = customerIdFake,
+            id = 1
+        )
         val valueAsStringCredit: String = objectMapper.writeValueAsString(creditDto)
 
         mockMvc.perform(
@@ -99,66 +105,21 @@ class CreditControllerTest {
             .andExpect(MockMvcResultMatchers.status().isCreated)
             .andExpect(MockMvcResultMatchers.jsonPath("$.creditValue").value("1000.0"))
             .andExpect(
-                MockMvcResultMatchers.jsonPath("$.dayFirstInstallment").value(LocalDate.now().plusDays(10).toString())
+                MockMvcResultMatchers.jsonPath("$.dayFirstInstallment")
+                    .value(LocalDate.now().plusDays(10).toString())
             )
             .andExpect(MockMvcResultMatchers.jsonPath("$.numberOfInstallments").value(12))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.customerId").value(1L))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.customerId").value(1))
             .andDo(MockMvcResultHandlers.print())
 
-
-    }
-
-    @Test
-    fun `should not save a credit with customer invalid and return 404 status`() {
-        //given
-        val creditDto: CreditDto = Builds.buildCreditDto(customerId = 2L)
-        val valueAsStringCredit: String = objectMapper.writeValueAsString(creditDto)
-
         mockMvc.perform(
-            MockMvcRequestBuilders.post(URL1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(valueAsStringCredit)
-        )
-
-            .andExpect(MockMvcResultMatchers.status().isNotFound)
-            .andExpect(MockMvcResultMatchers.jsonPath("$.title").value("NOT FOUND!"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.timestamp").exists())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(404))
-            .andExpect(
-                MockMvcResultMatchers.jsonPath("$.exception")
-                    .value("class me.dio.credit.application.system.exceptions.BusinessException")
-            )
-            .andExpect(
-                MockMvcResultMatchers.jsonPath("$.details[*]").value("Id: ${creditDto.customerId} não encontrado!")
-            )
-            .andDo(MockMvcResultHandlers.print())
-
-    }
-
-
-    @Test
-    fun `should not find credit whith invalid customer id and return 400 status`() {
-        //given
-        val invalidId = 2L
-        //when
-        //then
-        mockMvc.perform(
-            MockMvcRequestBuilders.get(URL1)
+            MockMvcRequestBuilders.get("${CustomerResourceTest.URL}/${creditCodeFakeInvalid}")
                 .accept(MediaType.APPLICATION_JSON)
-                .param("customerId", invalidId.toString())
+                .param("creditCode", creditCodeFake.toString())
         )
             .andExpect(MockMvcResultMatchers.status().isNotFound)
-            .andExpect(MockMvcResultMatchers.jsonPath("$.title").value("NOT FOUND!"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.timestamp").exists())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(404))
-            .andExpect(
-                MockMvcResultMatchers.jsonPath("$.exception")
-                    .value("class me.dio.credit.application.system.exceptions.BusinessException")
-
-            )
-            .andExpect(MockMvcResultMatchers.jsonPath("$.details[*]").isNotEmpty)
             .andDo(MockMvcResultHandlers.print())
-    }
 
+    }
 
 }

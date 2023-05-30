@@ -8,8 +8,7 @@ import me.dio.credit.application.system.entity.Credit
 import me.dio.credit.application.system.entity.Customer
 import java.math.BigDecimal
 import java.time.LocalDate
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import java.util.*
 
 data class CreditDto(
 
@@ -19,7 +18,10 @@ data class CreditDto(
         value = 12,
         message = "O numero de parcelas deve ser menor que 12"
     ) val numberOfInstallments: Int,
-    @field:NotNull(message = "O id do cliente é obrigatório") var customerId: Long
+    @field:NotNull(message = "O id do cliente é obrigatório") var customerId: Long,
+    @field:NotNull var id: Long,
+    @field:NotNull val creditCode: UUID
+
 ) {
 
     fun toEntity(): Credit = Credit(
@@ -28,12 +30,10 @@ data class CreditDto(
         numberOfInstallments = this.numberOfInstallments,
         customer = Customer(
             id = this.customerId
-        )
+        ),
+        id = this.id,
+        creditCode = this.creditCode
     )
 
-    fun toJson(): String {
-        val objectMapper = ObjectMapper().registerModule(JavaTimeModule())
-        return objectMapper.writeValueAsString(this)
-    }
 
 }
