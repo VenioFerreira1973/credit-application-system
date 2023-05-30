@@ -3,7 +3,6 @@ package me.dio.credit.application.system.dto
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.NotNull
-import jakarta.validation.constraints.PositiveOrZero
 import me.dio.credit.application.system.entity.Address
 import me.dio.credit.application.system.entity.Customer
 import org.hibernate.validator.constraints.br.CPF
@@ -18,7 +17,8 @@ data class CustomerDto(
     @field:Email(message = "Email inválido") val email: String,
     @field:NotEmpty(message = "A senha é obrigatória") val password: String,
     @field:NotEmpty(message = "O CEP é obrigatório") val zipCode: String,
-    @field:NotEmpty(message = "A rua é obrigatória") val street: String
+    @field:NotEmpty(message = "A rua é obrigatória") val street: String,
+    @field:NotNull var id: Long
 ) {
 
     fun toEntity(): Customer = Customer(
@@ -31,7 +31,8 @@ data class CustomerDto(
         address = Address(
             zipCode = this.zipCode,
             street = this.street
-        )
+        ),
+        id = this.id
 
     )
 }

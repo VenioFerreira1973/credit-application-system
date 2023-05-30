@@ -23,9 +23,18 @@ class CreditService(
         return this.creditRepository.save(credit)
     }
 
+    /*
     override fun findAllByCustomer(customerId: Long): List<Credit> =
-        this.creditRepository.findAllByCustomerId(customerId)
+        this.creditRepository.findAllByCustomerId(customerId)*/
 
+    override fun findAllByCustomer(customerId: Long): List<Credit> {
+
+        if(this.creditRepository.findAllByCustomerId(customerId).isEmpty()){
+            throw BusinessException("Id: $customerId não encontrado!")
+        }else{
+            return this.creditRepository.findAllByCustomerId(customerId)
+        }
+    }
 
     override fun findByCreditCode(customerId: Long, creditCode: UUID): Credit {
         val credit: Credit = (this.creditRepository.findByCreditCode(creditCode)

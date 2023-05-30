@@ -1,13 +1,10 @@
 package me.dio.credit.application.system.controller
 
 import jakarta.validation.Valid
-import me.dio.credit.application.system.dto.CreditDto
-import me.dio.credit.application.system.dto.CreditView
-import me.dio.credit.application.system.dto.CreditViewList
+import me.dio.credit.application.system.dto.*
 import me.dio.credit.application.system.entity.Credit
 import me.dio.credit.application.system.service.impl.CreditService
 import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -26,10 +23,9 @@ class CreditController(
 ) {
 
     @PostMapping
-    fun saveCredit(@RequestBody @Valid creditDto: CreditDto): ResponseEntity<String> {
+    fun saveCredit(@RequestBody @Valid creditDto: CreditDto): ResponseEntity<CreditView> {
         val savedCredit: Credit = this.creditService.save(creditDto.toEntity())
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body("Credit ${savedCredit.creditCode} - ${savedCredit.customer?.firstName} saved")
+        return ResponseEntity.status(HttpStatus.CREATED).body(CreditView(savedCredit))
     }
 
     @GetMapping
